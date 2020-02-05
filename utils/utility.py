@@ -1,6 +1,7 @@
 import os
 import json
 import xml.etree.ElementTree as ET
+import torch
 
 kitti_label = {'car', 'van', 'truck','pedestrian', 'person_sitting', 'cyclist', 'tram','misc','dontcare'}
 label_map = {v:i+1 for i,v in enumerate (kitti_label)}
@@ -104,4 +105,29 @@ def save_as_json(sourcedir,outputdir):
             
     with open(os.path.join(outputdir,'Label_Map.json'),'w') as j:
         json.dump(label_map,j)
-        
+ 
+#intersection with bounding box presentation
+def intersection(set1,set2):
+    lower_bound = torch.max(set1[ : , :2 ].unsqueeze(1) , set[ : , :2 ].unsqueeze(0)) #n1,n2,2
+    upper_bound = torch.min(set1[ : , 2: ].unsqueeze(1) , set[ : , 2: ].unsqueeze(0))
+    
+    intersect   = torch.clamp(upper_bound-lower_bound , 0) #n1,n2,2
+    
+    return intersect[: , : , 0 ] * intersect[ : , : , 1 ] #n1,n2
+
+#intersection over union with bounding box presentation           
+def iou(set1,set2):
+    area_set1 = set1[ : , :2 ] - set1[ : , 2: ]
+    area_set1 = area_set1[ : , 0 ] * area_set1[ : , 1 ]
+    
+    area_set2 = set2[ : , :2 ] - set2[ : , 2: ]
+    area_set2 = area_set2[ : , 0 ] * area_set2[ : , 1 ]
+    
+    sum_of_area     = area_set1.unsqueeze(1) + area_set2.unsqueeze(0)
+    intersect       = intersection(set1 , set2)
+    union           = sum_of_area - intersect
+    
+    return  intersect / union
+    
+    
+    
