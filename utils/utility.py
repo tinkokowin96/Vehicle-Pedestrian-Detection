@@ -1,3 +1,5 @@
+#To_Do : TO Consifer for Valadation Dataset
+
 import os
 import json
 import xml.etree.ElementTree as ET
@@ -90,18 +92,24 @@ def parse_xml(path):
     return {'label':label,'truncate':truncate,'occlusion':occlusion,'bndbox':bndbox }
         
 #saving as json format
-def save_as_json(sourcedir,outputdir):    
-    file_name = []
+def save_as_json(xml_source,img_source,outputdir):    
+    file_name     = []
     train_objects = []
-    for root,dir,file in os.walk(sourcedir):
+    img_dir       = []
+    
+    for root,dir,file in os.walk(xml_source):
         for name in file:
             file_name.append(name)
     for ind in file_name:
-        objects = parse_xml(os.path.join(sourcedir,ind))
+        objects = parse_xml(os.path.join(xml_source,ind))
         train_objects.append(objects)
+        img_dir.append(os.path.join(img_source,ind))
    
     with open(os.path.join(outputdir,'Train_Objects.json'),'w') as k:
         json.dump(train_objects,k)
+        
+    with open(os.path.join(outputdir,'Train_Image.json'),'w') as k:
+        json.dump(img_dir,k)
             
     with open(os.path.join(outputdir,'Label_Map.json'),'w') as j:
         json.dump(label_map,j)
