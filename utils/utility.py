@@ -137,5 +137,11 @@ def iou(set1,set2):
     
     return  intersect / union
     
+def decimate(t,i):
+    for d in t.dim():
+        if not i[d] == None :
+            tensor = t.index_select(dim = d,
+                                    index = torch.arange(start = 0, end = t.size(d), step = i).long())
+    return tensor
     
     
