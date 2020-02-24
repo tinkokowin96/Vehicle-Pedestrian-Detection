@@ -54,3 +54,46 @@ def create_prior_boxes():
         prior_boxes.clamp(0,1)
         
         return prior_boxes
+
+#intersection with bounding box presentation
+def intersection(set1,set2):
+    lower_bound = torch.max(set1[ : , :2 ].unsqueeze(1) , set[ : , :2 ].unsqueeze(0)) #n1,n2,2
+    upper_bound = torch.min(set1[ : , 2: ].unsqueeze(1) , set[ : , 2: ].unsqueeze(0))
+    
+    intersect   = torch.clamp(upper_bound-lower_bound , 0) #n1,n2,2
+    
+    return intersect[: , : , 0 ] * intersect[ : , : , 1 ] #n1,n2
+
+#intersection over union with bounding box presentation           
+def iou(set1,set2):
+    area_set1 = set1[ : , :2 ] - set1[ : , 2: ]
+    area_set1 = area_set1[ : , 0 ] * area_set1[ : , 1 ]
+    
+    area_set2 = set2[ : , :2 ] - set2[ : , 2: ]
+    area_set2 = area_set2[ : , 0 ] * area_set2[ : , 1 ]
+    
+    sum_of_area     = area_set1.unsqueeze(1) + area_set2.unsqueeze(0)
+    intersect       = intersection(set1 , set2)
+    union           = sum_of_area - intersect
+    
+    return  intersect / union
+    
+def xy_to_cxcy(box):
+    #change to center coordinate form boundary coordinate
+    return torch.cat([(box[: , :2] + box[: , 2:]) / 2 , #cxcy
+                       box[: , 2:] - box[: , :2]] , 1)#wh
+    
+def cxcy_to_xy(box):
+    #change from center coordinate to boundary coordinate
+    return torch.cat([box[: , :2] - (box[: , 2:] / 2), #xmin,ymin
+                      box[: , :2] + (box[: , 2:] / 2)] , 1)#xmax,ymax
+    
+def cxcy_to_encxcy(pre_box,pri_box):
+    #encode the boxes
+    return torch.cat([(pre_box[: , :2] - pri_box[: , :2]) / (pri_box[: , :2] / 10) , #encxcy
+                       torch.log(pre_box[: , 2:] / pri_box[: , 2:]) * 5] , 1) #enwh
+
+def encxcy_to_cxcy(pre_box,pri_box): 
+    #decode the boxes
+    return torch.cat([pre_box[: , :2] * pri_box[: , 2:] / 10 + pri_box[: , :2], #cxcy
+                      torch.exp(pre_box[: , 2:] / 5) * pri_box[: , 2:]] , 1) #wh
