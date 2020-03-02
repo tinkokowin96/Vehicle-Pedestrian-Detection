@@ -121,5 +121,53 @@ def decimate(t,i):
             tensor = t.index_select(dim = d,
                                     index = torch.arange(start = 0, end = t.size(d), step = i).long())
     return tensor
+
+
+def save_checkpoint(epoch,epo_since_improv,optimizer,model,val_lossloss,best_loss,is_best):
+    state = {'epoch':epoch,
+             'epoch_since_improvemnt':epo_since_improv,
+             'model':model,
+             'loss':val_loss
+             'best_loss':best_loss,
+             'optimizer':optimizer,
+             'is_best':is_best
+             }
+    file_name = 'checkpoint.pth'
+    outputdir = 'D:/Projects/Research/Vehicle & Pedestrian Detection/Checkpoint'
+    if is_best:
+        torch.save(state,outputdir +'BEST_'+file_name)
+    else:
+        torch.save(state,outputdir + file_name)
+      
+
+def decay_learningrate(optimizer,scale):
+    #if the loss stop improving use this def
+    for param in optimizer.param_groups:
+        param['lr'] = param['lr'] * scale
+    print("Decayed Learning Rate!! /t The new Learning Rate is %f" %(optimizer.param_groups['lr']))
+
+
+def grad_clip(c_grad,optimizer):
+    #if the gradient are exploding during backprop click grad
+    for p_group in optimizer.param_groups:
+        for param in p_group['params']:
+            if param.grad is not None:
+                param.grad.data.clamp_(-c_grad,c_grad)
+                
+            
+class CalculateAvg():
+    def __init(self):
+        self.param = 0
+        self.p_sum = 0
+        self.count = 0
+        self.avg   = 0
+        
+    def update(self,param,n=1):
+        self.param  = param
+        self.p_sum += param * n
+        self.count += n
+        self.avg    = self.p_sum / self.count
+        
+
     
     

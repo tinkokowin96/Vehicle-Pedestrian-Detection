@@ -28,7 +28,7 @@ class KITTI_Dataset (Dataset):
         
         image,label,truncate,occlusion,bndbox = transform(image,label,truncate,occlusion,bndbox)
         
-        return image,label,truncate,occlusion,bndbox
+        return image,bndbox,label,truncate,occlusion
     
     def __len__(self):
         return len(self.image)
@@ -47,8 +47,8 @@ class KITTI_Dataset (Dataset):
             occlusion.append(b[3])
             box.append(b[4])
         
-#concentenate the sequence of tensor in one tensor.At former,the structure is like [tensor,tensor].After this,it will be one tensor
-#of image
+        #concentenate the sequence of tensor in one tensor.At former,the structure is like [tensor,tensor].After this,it will be 
+        #one tensor of image
         image = torch.stack(image,dim = 0) 
         
-        return image,label,truncate,occlusion,box
+        return image,box,label,truncate,occlusion

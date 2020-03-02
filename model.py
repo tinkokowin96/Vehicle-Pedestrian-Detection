@@ -273,5 +273,3 @@ class SSD(nn.Module):
         locs,class_scores = self.pred(conv4_3_feat,conv7_feat,conv8_2_feat,conv9_2_feat,conv10_2_feat,conv11_2_feat)
         
         return locs,class_scores
-                
-                
