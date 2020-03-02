@@ -1,8 +1,6 @@
-#To_Do : TO Consifer for Valadation Dataset
-
 import os
 import json
-import xml.etree.ElementTree as ET
+import xml.etree.cElementTree as ET
 import torch
 
 kitti_label = {'car', 'van', 'truck','pedestrian', 'person_sitting', 'cyclist', 'tram','misc','dontcare'}
@@ -59,12 +57,11 @@ def txt_to_xml (sourcedir,outputdir):
         xml_file.close() 
 
 #creating datalist
-def parse_xml(path):
-    
+def parse_xml(path):  
     tree = ET.parse(path)
     root = tree.getroot()
     
-    label = list()
+    label     = list()
     truncate  = list()
     occlusion = list()
     bndbox    = list() 
@@ -92,28 +89,53 @@ def parse_xml(path):
     return {'label':label,'truncate':truncate,'occlusion':occlusion,'bndbox':bndbox }
         
 #saving as json format
-def save_as_json(xml_source,img_source,outputdir):    
-    file_name     = []
-    train_objects = []
-    img_dir       = []
-    
-    for root,dir,file in os.walk(xml_source):
-        for name in file:
-            file_name.append(name)
-    for ind in file_name:
-        objects = parse_xml(os.path.join(xml_source,ind))
-        train_objects.append(objects)
-        img_dir.append(os.path.join(img_source,ind))
-   
-    with open(os.path.join(outputdir,'Train_Objects.json'),'w') as k:
-        json.dump(train_objects,k)
-        
-    with open(os.path.join(outputdir,'Train_Image.json'),'w') as k:
-        json.dump(img_dir,k)
+def save_as_json(split,outputdir):    
+    #train   
+    if split == 'train':
+        train_xml     = 'D:/Projects/Research/Vehicle & Pedestrian Detection/XML/train'
+        img_source    = 'D:/Projects/Research/Resources/kitti-object-detection/training/image_2'
+        file_name     = []
+        train_objects = []
+        img_dir       = []
+        for root,dir,file in os.walk(train_xml):
+            for name in file:
+                file_name.append(name)
+                
+        for ind in file_name:
+            objects = parse_xml(os.path.join(train_xml,ind))
+            train_objects.append(objects)
+            img_dir.append(os.path.join(img_source,ind))
+       
+        with open(os.path.join(outputdir,'Train_Objects.json'),'w') as k:
+            json.dump(train_objects,k)
             
-    with open(os.path.join(outputdir,'Label_Map.json'),'w') as j:
-        json.dump(label_map,j)
- 
+        with open(os.path.join(outputdir,'Train_Image.json'),'w') as k:
+            json.dump(img_dir,k)
+                
+        with open(os.path.join(outputdir,'Label_Map.json'),'w') as j:
+            json.dump(label_map,j)       
+    #test
+    if split == 'test':
+        test_xml      = 'D:/Projects/Research/Vehicle & Pedestrian Detection/XML/test'
+        img_source    = 'D:/Projects/Research/Resources/kitti-object-detection/testing/image_2'
+        file_name     = []
+        test_objects  = []
+        img_dir       = []
+        for root,dir,file in os.walk(test_xml):
+            for name in file:
+                file_name.append(name)
+                
+        for ind in file_name:
+            objects = parse_xml(os.path.join(test_xml,ind))
+            test_objects.append(objects)
+            img_dir.append(os.path.join(img_source,ind))
+       
+        with open(os.path.join(outputdir,'Val_Objects.json'),'w') as k:
+            json.dump(test_objects,k)
+            
+        with open(os.path.join(outputdir,'Val_Image.json'),'w') as k:
+            json.dump(img_dir,k)
+   
     
 def decimate(t,i):
     for d in t.dim():
@@ -123,11 +145,11 @@ def decimate(t,i):
     return tensor
 
 
-def save_checkpoint(epoch,epo_since_improv,optimizer,model,val_lossloss,best_loss,is_best):
+def save_checkpoint(epoch,epo_since_improv,optimizer,model,val_loss,best_loss,is_best):
     state = {'epoch':epoch,
              'epoch_since_improvemnt':epo_since_improv,
              'model':model,
-             'loss':val_loss
+             'loss':val_loss,
              'best_loss':best_loss,
              'optimizer':optimizer,
              'is_best':is_best

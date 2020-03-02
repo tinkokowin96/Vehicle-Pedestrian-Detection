@@ -6,7 +6,7 @@ import torch
 from utils.utility import grad_clip,save_checkpoint,CalculateAvg
 from functions.multibox_loss import MultiboxLoss
 
-data_folder  = ""
+data_folder  = "D:/Projects/Research/Vehicle & Pedestrian Detection/JSON"
 n_classes    = 10
 device       = torch.device("cuda" if torch.cuda.is_available() else "cpu" )
 

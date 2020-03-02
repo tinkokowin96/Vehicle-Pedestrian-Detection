@@ -1,1 +1,1 @@
-{"pedestrian": 1, "tram": 2, "truck": 3, "dontcare": 4, "misc": 5, "car": 6, "cyclist": 7, "van": 8, "person_sitting": 9, "background": 0}
+{"person_sitting": 1, "car": 2, "truck": 3, "pedestrian": 4, "cyclist": 5, "dontcare": 6, "van": 7, "tram": 8, "misc": 9, "background": 0}
