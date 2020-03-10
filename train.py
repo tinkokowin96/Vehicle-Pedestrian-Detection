@@ -19,6 +19,7 @@ weight_decay = 5e-4
 lr = 1e-3
 momentum = 0.9
 c_grad = None
+#checkpoint = "D:/Projects/Research/Vehicle & Pedestrian Detection/Checkpoint/BEST_checkpoint.pth"
 checkpoint = None
 best_loss = 100.
 print_freq = 100
@@ -46,8 +47,8 @@ def main():
         
     else:
         checkpoint = torch.load(checkpoint)
-        start_epoch = checkpoint['start_epoch'] + 1
-        epo_since_imporv = checkpoint['epoch_since_imporovement']
+        start_epoch = checkpoint['epoch'] + 1
+        epo_since_imporv = checkpoint['epoch_since_improvement']
         model = checkpoint['model']
         optimizer = checkpoint['optimizer']
         best_loss = checkpoint['best_loss']
@@ -79,7 +80,7 @@ def main():
             epo_since_imporv += 1
             print("Number of epochs since imporvement :%d\n" % epo_since_imporv)
             
-        save_checkpoint(epoch, epo_since_imporv, model, val_loss, best_loss, optimizer, is_best)
+        save_checkpoint(epoch, epo_since_imporv, optimizer, model, val_loss, best_loss, is_best)
 
 def train(train_loader, epoch, model, criteria, optimizer):
     model.train()
@@ -153,8 +154,8 @@ def validate(val_loader, model, criteria):
                                                                     load_time=load_time,
                                                                     loss=losses))
 
-        print('\n * Loss: {loss.avg:.3f}'.format(loss=losses))
-        return loss
+    print('\n * Loss: {loss.avg:.3f}'.format(loss=losses))
+    return losses.avg
 
 if __name__ == '__main__':
     main()

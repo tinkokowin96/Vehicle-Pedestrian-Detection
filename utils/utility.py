@@ -153,20 +153,21 @@ def save_checkpoint(epoch, epo_since_improv, optimizer, model, val_loss, best_lo
     global count
     count += 1
     state = {'epoch': epoch,
-             'epoch_since_improvemnt': epo_since_improv,
+             'epoch_since_improvement': epo_since_improv,
              'model': model,
              'loss': val_loss,
              'best_loss': best_loss,
              'optimizer': optimizer,
              'is_best': is_best
              }
-    file_name = 'checkpoint.pth'
+    file_name = 'checkpoint'
     outputdir = 'D:/Projects/Research/Vehicle & Pedestrian Detection/Checkpoint/'
     if is_best:
-        torch.save(state, outputdir + 'BEST_'+file_name)
+        torch.save(state, outputdir + 'BEST_'+file_name+'.pth')
+        count = 0
     else:
-        if count != 10:
-            torch.save(state, outputdir +'last_'+file_name+count)
+        if count != 5:
+            torch.save(state, outputdir +'last_'+file_name+str(count)+'.pth')
         else:
             count = 0
 
