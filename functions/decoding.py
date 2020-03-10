@@ -2,6 +2,8 @@ from utils.box_utils import create_prior_boxes,encxcy_to_cxcy,iou
 import torchvision.transforms.functional as F
 import torch
 
+device       = torch.device("cuda" if torch.cuda.is_available() else "cpu" )
+
 def decoding(no_classes,min_score,max_overlap,top_k,predicted_scores,predicted_location):
     pri_box     = create_prior_boxes()
     scores      = F.softmax(predicted_scores,dim=2)
@@ -29,7 +31,8 @@ def decoding(no_classes,min_score,max_overlap,top_k,predicted_scores,predicted_l
             class_label   = list()
             class_score   = list()
             
-            suppress      = torch.zeros(class_dec_loc.size(0), dtype=torch.uint8)
+            suppress      = torch.zeros(class_dec_loc.size(0), dtype=torch.uint8).to(device)
+            
             for box in range(suppress.size()):
                 if suppress[box] == 1:
                     continue
@@ -46,15 +49,15 @@ def decoding(no_classes,min_score,max_overlap,top_k,predicted_scores,predicted_l
                 
             suppress = torch.tensor(suppress,dtype = torch.bool)               
             class_box.append(decoded_loc[1-suppress])
-            class_label.append(torch.LongTensor(predicted_scores[1-suppress].sum().item()*[c]))
+            class_label.append(torch.LongTensor(predicted_scores[1-suppress].sum().item()*[c]).to(device))
             class_score.append(class_score[1-suppress])
        
         no_object = len(class_box)
         #if no object is found ,we'll set it as background     
         if no_object == 0:
-            class_box.append(torch.FloatTensor([0.,0.,1.,1.]))
-            class_label.append(torch.LongTensor([0]))
-            class_score.append(torch.FloatTensro([0.]))
+            class_box.append(torch.FloatTensor([[0.,0.,1.,1.]]).to(device))
+            class_label.append(torch.LongTensor([0]).to(device))
+            class_score.append(torch.FloatTensro([0.]).to(device))
                 
         #concentenate into a single tensor
         class_box   = torch.cat(class_box , dim=0)
