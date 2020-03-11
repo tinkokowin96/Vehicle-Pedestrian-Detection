@@ -24,7 +24,6 @@ class MultiboxLoss(nn.Module):
         for i in range(pre_box.size(0)):
             no_objects = boxes[i].size(0)
             overlap = iou(boxes[i], self.prior_xy)  # obj,8732
-            #print(overlap)
             overlap_to_obj, obj_for_priors = overlap.max(dim=0)
 
             _, prior_for_obj = overlap.max(dim=1)
@@ -39,14 +38,11 @@ class MultiboxLoss(nn.Module):
 
             true_class[i] = label_for_priors
             true_loc[i] = cxcy_to_encxcy(xy_to_cxcy(boxes[i][obj_for_priors]), self.prior_cxcy)
-            #print(true_loc)
+
         positive_priors = true_class != 0  # N,8732
 
         # location loss
         loc_loss = self.smoothl1loss(pre_box[positive_priors], true_loc[positive_priors])  # scalar
-        # print('Predicted location is {0}'.format(pre_box))
-        # print('True location is {0}'.format(true_loc))
-        # print('The Location loss is {0}'.format(loc_loss))
 
         # confident loss
         no_positive = positive_priors.sum(dim=1)

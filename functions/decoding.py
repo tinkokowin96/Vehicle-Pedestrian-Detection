@@ -16,7 +16,7 @@ def decoding(no_classes,min_score,max_overlap,top_k,predicted_scores,predicted_l
     for i in range(batch_size):
         decoded_loc   = encxcy_to_cxcy(predicted_location[i], pri_box)
         
-        for c in range(1,no_classes):
+        for c in range(1, no_classes):
             class_score   = scores[i][:,c] #8732
             score_abv_min = class_score > min_score #8732
             class_score   = class_score[score_abv_min] #no: qualified

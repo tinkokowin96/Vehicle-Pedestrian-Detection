@@ -3,9 +3,9 @@ import json
 import xml.etree.cElementTree as ET
 import torch
 
-kitti_label = {'car', 'van', 'truck', 'pedestrian', 'person_sitting', 'cyclist', 'tram', 'misc', 'dontcare'}
+kitti_label = {'car', 'van', 'truck', 'pedestrian', 'person_sitting', 'cyclist', 'tram', 'misc'}
 label_map = {v: i+1 for i, v in enumerate(kitti_label)}
-label_map['background'] = 0
+label_map['dontcare'] = 0
 
 count = 0
 
@@ -16,7 +16,6 @@ def txt_to_xml(sourcedir, outputdir):
         for name in file:
             file_list.append(name)
             dir_list.append(os.path.join(root, name))
-
 
     num_file = len(file_list)
     for i in range(num_file):

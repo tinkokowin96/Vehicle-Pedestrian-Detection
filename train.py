@@ -7,7 +7,7 @@ from utils.utility import grad_clip, save_checkpoint, CalculateAvg
 from functions.multibox_loss import MultiboxLoss
 
 data_folder = "D:/Projects/Research/Vehicle & Pedestrian Detection/JSON"
-n_classes = 10
+n_classes = 9
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
 start_epoch = 0
@@ -19,8 +19,8 @@ weight_decay = 5e-4
 lr = 1e-3
 momentum = 0.9
 c_grad = None
-#checkpoint = "D:/Projects/Research/Vehicle & Pedestrian Detection/Checkpoint/BEST_checkpoint.pth"
-checkpoint = None
+checkpoint = "D:/Projects/Research/Vehicle & Pedestrian Detection/Checkpoint/BEST_checkpoint.pth"
+#checkpoint = None
 best_loss = 100.
 print_freq = 100
 
