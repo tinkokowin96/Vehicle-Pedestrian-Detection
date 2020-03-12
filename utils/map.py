@@ -4,9 +4,9 @@ kitti_label = {'car', 'van', 'truck', 'pedestrian', 'person_sitting', 'cyclist',
 label_map = {v: i+1 for i, v in enumerate(kitti_label)}
 label_map['dontcare'] = 0
 rev_label_map = {i: v for v, i in label_map.items()}
+n_classes = len(label_map)
 
 def mean_average_precision(det_boxes, det_labels, det_scores, true_boxes, true_labels, truncated, occlusion):
-    n_classes = len(label_map)
     true_objects = []
     assert det_boxes.size(0) == det_labels.size(0) == det_scores.size(0), \
         "Something is wrong here!! Number of Detected boxes and labels doesn't match"
@@ -19,24 +19,25 @@ def mean_average_precision(det_boxes, det_labels, det_scores, true_boxes, true_l
     occlusion = occlusion.cat(dim=0)
 
     if 0.0 < truncated <= 0.15 and occlusion == 0:
-        level, det_objects, det_boxes, det_labels, det_scores,true_objects, true_boxes, true_labels = \
+        level, det_objects, det_boxes, det_labels, det_scores, true_objects, true_boxes, true_labels = \
             easy_detect(det_boxes, det_labels, det_scores, true_objects, true_boxes, true_labels, truncated, occlusion)
         calculate_map(level, det_objects, det_boxes, det_labels, det_scores, true_objects, true_boxes, true_labels)
 
     if 0.16 < truncated <= 0.30 and occlusion == 1:
         level, det_objects, det_boxes, det_labels, det_scores, true_objects, true_boxes, true_labels = \
-            moderate_detect(det_boxes, det_labels, det_scores,true_objects, true_boxes, true_labels, truncated, occlusion)
+            moderate_detect(det_boxes, det_labels, det_scores, true_objects, true_boxes, true_labels, truncated, occlusion)
         calculate_map(level, det_objects, det_boxes, det_labels, det_scores, true_objects, true_boxes, true_labels)
 
     if 0.31 < truncated <= 1.0 and occlusion == 2 or 3:
-        level, det_objects, det_boxes, det_labels, det_scores,true_objects, true_boxes, true_labels = \
+        level, det_objects, det_boxes, det_labels, det_scores, true_objects, true_boxes, true_labels = \
             hard_detect(det_boxes, det_labels, det_scores, true_objects, true_boxes, true_labels, truncated, occlusion)
         calculate_map(level, det_objects, det_boxes, det_labels, det_scores, true_objects, true_boxes, true_labels)
 
-def calculate_map(level, det_objects, det_boxes, det_labels, det_scores,true_objects, true_boxes, true_labels):
+def calculate_map(level, det_objects, det_boxes, det_labels, det_scores, true_objects, true_boxes, true_labels):
+    global n_classes
     true_positive = torch.zeros(det_boxes.size(0), dtype=uint8)
     false_positive = torch.zeros(det_boxes.size(0), dtype=uint8)
-    averge_precision = torch.zeros(n_classes - 1)
+    average_precision = torch.zeros(n_classes - 1)
 
     for c in range(1, n_classes):
         class_true_objects = true_objects[true_labels == c]
@@ -94,13 +95,13 @@ def calculate_map(level, det_objects, det_boxes, det_labels, det_scores,true_obj
                 precisions[i] = cumul_precision[recall_abv_thres].max()
             else:
                 precisions[i] = 0
-        averge_precision[c - 1] = precisions.mean()
+        average_precision[c - 1] = precisions.mean()
 
-    map = averge_precision.mean()
-    ap = {rev_label_map[i + 1]: v for i,v in enumerate(averge_precision.tolist())}
+    map = average_precision.mean()
+    ap = {rev_label_map[i + 1]: v for i, v in enumerate(average_precision.tolist())}
     return level, ap, map
 
-def easy_detect(det_boxes, det_labels, det_scores,true_objects, true_boxes, true_labels, truncated, occlusion):
+def easy_detect(det_boxes, det_labels, det_scores, true_objects, true_boxes, true_labels, truncated, occlusion):
     level = {'Difficulty Level': 'Easy'}
     moder_obj = 0.0 < truncated <= 0.15 and occlusion == 0
     det_boxes = det_boxes[moder_obj]
@@ -121,8 +122,8 @@ def easy_detect(det_boxes, det_labels, det_scores,true_objects, true_boxes, true
 
     return level, det_objects, det_boxes, det_labels, det_scores, true_objects, true_boxes, true_labels
 
-def moderate_detect(det_boxes, det_labels, det_scores,true_objects, true_boxes, true_labels, truncated, occlusion):
-    level = {'Difficulty Level':'Moderate'}
+def moderate_detect(det_boxes, det_labels, det_scores, true_objects, true_boxes, true_labels, truncated, occlusion):
+    level = {'Difficulty Level': 'Moderate'}
     moder_obj = 0.16 < truncated <= 0.30 and occlusion == 1
     det_boxes = det_boxes[moder_obj]
     det_labels = det_labels[moder_obj]
@@ -142,7 +143,7 @@ def moderate_detect(det_boxes, det_labels, det_scores,true_objects, true_boxes, 
 
     return level, det_objects, det_boxes, det_labels, det_scores, true_objects, true_boxes, true_labels
 
-def hard_detect(det_boxes, det_labels, det_scores,true_objects, true_boxes, true_labels, truncated, occlusion):
+def hard_detect(det_boxes, det_labels, det_scores, true_objects, true_boxes, true_labels, truncated, occlusion):
     level = {'Difficulty Level': 'Hard'}
     moder_obj = 0.31 < truncated <= 1.0 and occlusion == 2 or 3
     det_boxes = det_boxes[moder_obj]
@@ -162,4 +163,3 @@ def hard_detect(det_boxes, det_labels, det_scores,true_objects, true_boxes, true
     true_labels = true_labels[moder_obj]
 
     return level, det_objects, det_boxes, det_labels, det_scores, true_objects, true_boxes, true_labels
-

@@ -2,12 +2,12 @@ from utils.box_utils import create_prior_boxes,encxcy_to_cxcy,iou
 import torchvision.transforms.functional as F
 import torch
 
-device       = torch.device("cuda" if torch.cuda.is_available() else "cpu" )
+device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
-def decoding(no_classes,min_score,max_overlap,top_k,predicted_scores,predicted_location):
-    pri_box     = create_prior_boxes()
-    scores      = F.softmax(predicted_scores,dim=2)
-    batch_size  = predicted_scores.size(0)
+def decode(no_classes, min_score, max_overlap, top_k, predicted_location, predicted_scores):
+    pri_box = create_prior_boxes()
+    scores = F.softmax(predicted_scores,dim=2)
+    batch_size = predicted_scores.size(0)
     
     all_boxes  = list()
     all_labels = list()
@@ -74,4 +74,4 @@ def decoding(no_classes,min_score,max_overlap,top_k,predicted_scores,predicted_l
         all_labels.append(class_label)
         all_score.append(class_score)
     
-    return all_boxes,all_boxes,all_score
+    return all_boxes, all_labels, all_score

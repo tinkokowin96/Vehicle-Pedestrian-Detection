@@ -15,8 +15,8 @@ no_epoch = 200
 epo_since_imporv = 0
 batch_size = 16
 no_worker = 6
-weight_decay = 5e-4
-lr = 1e-3
+weight_decay = 1e-3
+lr = 1e-4
 momentum = 0.9
 c_grad = None
 checkpoint = "D:/Projects/Research/Vehicle & Pedestrian Detection/Checkpoint/BEST_checkpoint.pth"
@@ -58,12 +58,12 @@ def main():
     criteria = MultiboxLoss(n_classes).to(device)
 
     train_data = KITTI_Dataset(data_folder, 'train')
-    train_loader = torch.utils.data.DataLoader(train_data, batch_size=batch_size, shuffle=False,
+    train_loader = torch.utils.data.DataLoader(train_data, batch_size=batch_size, shuffle=True,
                                                collate_fn=train_data.collate_fn, num_workers=no_worker,
                                                pin_memory=True)
     
     val_data = KITTI_Dataset(data_folder, 'test')
-    val_loader = torch.utils.data.DataLoader(val_data, batch_size=batch_size, shuffle=False,
+    val_loader = torch.utils.data.DataLoader(val_data, batch_size=batch_size, shuffle=True,
                                              collate_fn=val_data.collate_fn, num_workers=no_worker,
                                              pin_memory=True)
 
