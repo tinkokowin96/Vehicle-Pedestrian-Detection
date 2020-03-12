@@ -77,8 +77,8 @@ def randn_crop(img, label, boxes, truncate, occlusion):
             
             bndbox[:, :2] = torch.max(bndbox[:, :2], crop[:2])
             bndbox[:, :2] -= crop[:2]
-            bndbox[:, 2:] = torch.max(bndbox[:, 2:], crop[2:])
-            bndbox[:, 2:] -= crop[2:]
+            bndbox[:, 2:] = torch.min(bndbox[:, 2:], crop[2:])
+            bndbox[:, 2:] -= crop[:2]
             #print(bndbox)
             return new_img, labels, bndbox, truncates, occlusion
 
@@ -112,7 +112,6 @@ def photometric_distortion(img):
             new_img = dis(img, adjust)
     return new_img
 
-        
 def resize(img, boxes, dim=(300, 300), return_percent=True):
     new_img = FT.resize(img, dim)
     old_dim = torch.FloatTensor([img.width, img.height, img.width, img.height]).unsqueeze(0)
@@ -136,8 +135,8 @@ def transform(img, label, box, truncate, occlusion, split):
 
         if random.random() < 0.5:
             new_img, new_box = expend(new_img, new_box, mean)
-        #new_img, new_label, new_box, new_truncate, new_occlusion = \
-            #randn_crop(new_img, new_label, new_box, new_truncate, new_occlusion)
+        new_img, new_label, new_box, new_truncate, new_occlusion = \
+            randn_crop(new_img, new_label, new_box, new_truncate, new_occlusion)
 
         new_img = FT.to_pil_image(new_img)
         if random.random() < 0.5:
