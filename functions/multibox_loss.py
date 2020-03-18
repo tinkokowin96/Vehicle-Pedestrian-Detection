@@ -4,8 +4,9 @@ import torch
 
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
+
 class MultiboxLoss(nn.Module):
-    def __init__(self, no_class, threshold=0.5, alpha=1):
+    def __init__(self, no_class, threshold=0.5, alpha=1.):
         super().__init__()
 
         self.no_class = no_class
@@ -55,7 +56,7 @@ class MultiboxLoss(nn.Module):
         conf_loss_neg[positive_priors] = 0
         conf_loss_neg, _ = conf_loss_neg.sort(dim=1, descending=True)
         no_hard_negative = 3 * no_positive
-        hard_neg_ser = torch.LongTensor(range(no_prior)).expand_as(conf_loss_neg).to(device)  # N,8732
+        hard_neg_ser = torch.LongTensor(range(no_prior)).unsqueeze(0).expand_as(conf_loss_neg).to(device)  # N,8732
         hard_negative = hard_neg_ser < no_hard_negative.unsqueeze(1)
         conf_loss_hard_negative = conf_loss_neg[hard_negative]
 

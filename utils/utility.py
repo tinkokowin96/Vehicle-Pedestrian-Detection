@@ -4,10 +4,11 @@ import xml.etree.cElementTree as ET
 import torch
 
 kitti_label = {'car', 'van', 'truck', 'pedestrian', 'person_sitting', 'cyclist', 'tram', 'misc'}
-label_map = {v: i+1 for i, v in enumerate(kitti_label)}
+label_map = {v: i + 1 for i, v in enumerate(kitti_label)}
 label_map['dontcare'] = 0
 
 count = 0
+
 
 def txt_to_xml(sourcedir, outputdir):
     file_list = []
@@ -21,7 +22,7 @@ def txt_to_xml(sourcedir, outputdir):
     for i in range(num_file):
         file_name = file_list[i].replace('.txt', '')
 
-        xml_file = open(os.path.join(outputdir, file_name+'.xml'), 'w')
+        xml_file = open(os.path.join(outputdir, file_name + '.xml'), 'w')
 
         xml_file.write('<?xml version="1.0" encoding="UTF-8"?>')
         xml_file.write('<annotation>')
@@ -42,21 +43,21 @@ def txt_to_xml(sourcedir, outputdir):
 
             index += 1
         for ind in range(index):
-            xml_file.write('  '+'<object>')
-            xml_file.write('   '+'<name>'+obj_label[ind]+'</name>')
-            xml_file.write('   '+'<truncate>'+truncate[ind]+'</truncate>')
-            xml_file.write('   '+'<occlusion>'+occlusion[ind]+'</occlusion>')
-            xml_file.write('   '+'<bndbox>'+'\n')
-            xml_file.write('    '+'<xmin>'+bndbox[ind][0]+'</xmin>')
-            xml_file.write('    '+'<ymin>'+bndbox[ind][1]+'</ymin>')
-            xml_file.write('    '+'<xmax>'+bndbox[ind][2]+'</xmax>')
-            xml_file.write('    '+'<ymax>'+bndbox[ind][3]+'</ymax>')
-            xml_file.write('   '+'</bndbox>')
-            xml_file.write('  '+'</object>')
+            xml_file.write('  ' + '<object>')
+            xml_file.write('   ' + '<name>' + obj_label[ind] + '</name>')
+            xml_file.write('   ' + '<truncate>' + truncate[ind] + '</truncate>')
+            xml_file.write('   ' + '<occlusion>' + occlusion[ind] + '</occlusion>')
+            xml_file.write('   ' + '<bndbox>' + '\n')
+            xml_file.write('    ' + '<xmin>' + bndbox[ind][0] + '</xmin>')
+            xml_file.write('    ' + '<ymin>' + bndbox[ind][1] + '</ymin>')
+            xml_file.write('    ' + '<xmax>' + bndbox[ind][2] + '</xmax>')
+            xml_file.write('    ' + '<ymax>' + bndbox[ind][3] + '</ymax>')
+            xml_file.write('   ' + '</bndbox>')
+            xml_file.write('  ' + '</object>')
         xml_file.write('</annotation>')
         xml_file.close()
 
-#creating datalist
+
 def parse_xml(path):
     tree = ET.parse(path)
     root = tree.getroot()
@@ -91,9 +92,10 @@ def parse_xml(path):
         bndbox.append([xmin, ymin, xmax, ymax])
     return {'label': label, 'truncate': truncate, 'occlusion': occlusion, 'bndbox': bndbox}
 
-#saving as json format
+
+# saving as json format
 def save_as_json(split, outputdir):
-    #train
+    # train
     if split == 'train':
         train_xml = 'D:/Projects/Research/Vehicle & Pedestrian Detection/XML/train'
         img_source = 'D:/Projects/Research/Resources/kitti-object-detection/training/image_2'
@@ -118,7 +120,7 @@ def save_as_json(split, outputdir):
 
         with open(os.path.join(outputdir, 'Label_Map.json'), 'w') as j:
             json.dump(label_map, j)
-    #test
+    # test
     if split == 'test':
         test_xml = 'D:/Projects/Research/Vehicle & Pedestrian Detection/XML/test'
         img_source = 'D:/Projects/Research/Resources/kitti-object-detection/testing/image_2'
@@ -141,12 +143,14 @@ def save_as_json(split, outputdir):
         with open(os.path.join(outputdir, 'TEST_Image.json'), 'w') as k:
             json.dump(img_dir, k)
 
+
 def decimate(t, i):
     for d in range(t.dim()):
         if i[d] is not None:
             t = t.index_select(dim=d,
                                index=torch.arange(start=0, end=t.size(d), step=i[d]).long())
     return t
+
 
 def save_checkpoint(epoch, epo_since_improv, optimizer, model, val_loss, best_loss, is_best):
     global count
@@ -162,27 +166,29 @@ def save_checkpoint(epoch, epo_since_improv, optimizer, model, val_loss, best_lo
     file_name = 'checkpoint'
     outputdir = 'D:/Projects/Research/Vehicle & Pedestrian Detection/Checkpoint/'
     if is_best:
-        torch.save(state, outputdir + 'BEST_'+file_name+'.pth')
+        torch.save(state, outputdir + 'BEST_' + file_name + '.pth')
         count = 0
     else:
         if count != 5:
-            torch.save(state, outputdir +'last_'+file_name+str(count)+'.pth')
+            torch.save(state, outputdir + 'last_' + file_name + str(count) + '.pth')
         else:
             count = 0
 
+
 def decay_learningrate(optimizer, scale):
-    #if the loss stop improving use this def
+    # if the loss stop improving use this def
     for param in optimizer.param_groups:
         param['lr'] = param['lr'] * scale
     print("Decayed Learning Rate!! /t The new Learning Rate is %f" % (optimizer.param_groups['lr']))
 
 
 def grad_clip(c_grad, optimizer):
-    #if the gradient are exploding during backprop click grad
+    # if the gradient are exploding during backprop click grad
     for p_group in optimizer.param_groups:
         for param in p_group['params']:
             if param.grad is not None:
                 param.grad.data.clamp_(-c_grad, c_grad)
+
 
 class CalculateAvg(object):
     def __init__(self):

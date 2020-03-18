@@ -3,6 +3,7 @@ import torch
 from utils.box_utils import iou
 import torchvision.transforms.functional as FT
 
+
 def expend(img, boxes, filler):
     ori_h = img.size(1)
     ori_w = img.size(2)
@@ -24,7 +25,8 @@ def expend(img, boxes, filler):
     new_boxes = boxes + torch.FloatTensor([left, top, left, top]).unsqueeze(0)
     
     return new_img, new_boxes
-   
+
+
 def randn_crop(img, label, boxes, truncate, occlusion):
     ori_h = img.size(1)
     ori_w = img.size(2)
@@ -79,8 +81,8 @@ def randn_crop(img, label, boxes, truncate, occlusion):
             bndbox[:, :2] -= crop[:2]
             bndbox[:, 2:] = torch.min(bndbox[:, 2:], crop[2:])
             bndbox[:, 2:] -= crop[:2]
-            #print(bndbox)
             return new_img, labels, bndbox, truncates, occlusion
+
 
 def h_flip(img, boxes):
     new_image = FT.hflip(img)
@@ -112,6 +114,7 @@ def photometric_distortion(img):
             new_img = dis(img, adjust)
     return new_img
 
+
 def resize(img, boxes, dim=(300, 300), return_percent=True):
     new_img = FT.resize(img, dim)
     old_dim = torch.FloatTensor([img.width, img.height, img.width, img.height]).unsqueeze(0)
@@ -123,13 +126,14 @@ def resize(img, boxes, dim=(300, 300), return_percent=True):
 
     return new_img, new_box
 
+
 def transform(img, label, box, truncate, occlusion, split):
     # Mean and standard deviation of ImageNet data that our base VGG from torchvision was trained on
     # see: https://pytorch.org/docs/stable/torchvision/models.html
     mean = [0.485, 0.456, 0.406]
     std = [0.229, 0.224, 0.225]
     new_img, new_label, new_box, new_truncate, new_occlusion = img, label, box, truncate, occlusion
-    if split == 'TRAIN':
+    '''if split == 'TRAIN':
         new_img = photometric_distortion(new_img)
         new_img = FT.to_tensor(new_img)
 
@@ -141,7 +145,7 @@ def transform(img, label, box, truncate, occlusion, split):
         new_img = FT.to_pil_image(new_img)
         if random.random() < 0.5:
             new_img, new_box = h_flip(new_img, new_box)
-
+'''
     new_img, new_box = resize(new_img, new_box)
     new_img = FT.to_tensor(new_img)
     #Normalize
