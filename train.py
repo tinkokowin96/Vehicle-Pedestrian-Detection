@@ -19,7 +19,7 @@ weight_decay = 5e-4
 lr = 1e-3
 momentum = 0.9
 c_grad = None
-#checkpoint = "D:/Projects/Research/Vehicle & Pedestrian Detection/Checkpoint/BEST_checkpoint.pth"
+# checkpoint = "D:/Projects/Research/Vehicle & Pedestrian Detection/Checkpoint/BEST_checkpoint.pth"
 checkpoint = None
 best_loss = 100.
 print_freq = 100
@@ -28,7 +28,8 @@ cudnn.benchmark = True
 
 
 def main():
-    global n_classes, start_epoch, no_epoch, epo_since_imporv, batch_size, no_worker, weight_decay, lr, momentum, checkpoint, best_loss
+    global n_classes, start_epoch, no_epoch, epo_since_imporv, batch_size, no_worker, weight_decay, lr, momentum, \
+        checkpoint, best_loss
 
     biases = list()
     weight = list()

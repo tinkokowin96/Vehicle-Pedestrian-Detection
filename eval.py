@@ -2,7 +2,7 @@
 from tqdm import tqdm
 from pprint import PrettyPrinter
 from functions.decoding import decode
-from utils.eval_criteria import calculate_mAP
+from utils.eval_criteria import mean_average_precision
 from dataset import KITTI_Dataset
 import torch
 
@@ -40,7 +40,7 @@ def main():
             occlusions = [o.to(device) for o in occlusion]
 
             pre_boxes, pre_scores = model(images)  # forward propagate
-            dec_boxes, dec_labels, dec_scores = decode(9, 0.20, 0.45, 200, pre_boxes, pre_scores)
+            dec_boxes, dec_labels, dec_scores = decode(9, 0.01, 0.45, 200, pre_boxes, pre_scores)
 
             true_boxes.extend(boxes)
             true_labels.extend(labels)
@@ -50,8 +50,8 @@ def main():
             pred_labels.extend(dec_labels)
             pred_scores.extend(dec_scores)
 
-        aps, map = calculate_mAP(pred_boxes, pred_labels, pred_scores, true_boxes, true_labels, true_truncated,
-                                 true_occlusion)
+        aps, map = mean_average_precision(pred_boxes, pred_labels, pred_scores, true_boxes, true_labels, true_truncated,
+                                          true_occlusion)
     pp.pprint(aps)
     print('\nMean Average Precision (mAP): %.3f' % map)
 

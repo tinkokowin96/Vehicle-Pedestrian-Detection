@@ -11,13 +11,10 @@ for i in range(len(t)):
     r.extend([i] * t[i].size(0))
 r = torch.LongTensor(r)
 
-
-
 kitti_label = {'car', 'van', 'truck', 'pedestrian', 'person_sitting', 'cyclist', 'tram', 'misc'}
 label_map = {v: i+1 for i, v in enumerate(kitti_label)}
 label_map['dontcare'] = 0
 print(kitti_label)
-
 
 import torch
 
@@ -128,13 +125,10 @@ for i in range(n):
     if i == n-1:
         print("I love you")
 
-level = {}
+
 t = torch.tensor([1,3,4,2])
-for i in range(t.size(0)):
-    if t[i] == 1:
-        level['1'] = 'I love U'
-    if t[i] == 3:
-        level['2'] = 'I hate U'
+i = torch.tensor([3,2,0,1])
+r = t[i]
 
 
 
@@ -145,3 +139,7 @@ def calculate(n):
     else:
         return "NUM is ODD"
 
+t = torch.randn(3,4)
+r = torch.LongTensor(range(4)).unsqueeze(0).expand_as(t)
+
+l = [torch.randn(3,4),torch.randn(3,4)]

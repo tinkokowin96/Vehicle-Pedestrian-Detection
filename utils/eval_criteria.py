@@ -128,6 +128,7 @@ def calculate_map(level, det_objects, det_boxes, det_labels, det_scores, r_objec
             object_boxes = torch.cat(object_boxes, dim=0)
             object_boxes_ind = torch.tensor(object_boxes_ind)
 
+            print(this_det_box, '\n', object_boxes)
             overlap = iou(this_det_box, object_boxes)  # (1,n_objects)
             overlap, ind = overlap.squeeze(0).max(dim=0)  # ind is obj level ind we need to find the class level ind
 
@@ -167,7 +168,7 @@ def calculate_map(level, det_objects, det_boxes, det_labels, det_scores, r_objec
 
     map = average_precision.mean()
 
-    #print(map)
+    # print(map)
     ap = {rev_label_map[i + 1]: v for i, v in enumerate(average_precision.tolist())}
     print(ap)
     return map

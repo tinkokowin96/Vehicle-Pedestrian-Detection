@@ -115,7 +115,7 @@ def photometric_distortion(img):
     return new_img
 
 
-def resize(img, boxes, dim=(300, 300), return_percent=True):
+def resize(img, boxes, dim=(300, 300), return_percent=False):
     new_img = FT.resize(img, dim)
     old_dim = torch.FloatTensor([img.width, img.height, img.width, img.height]).unsqueeze(0)
     new_box = boxes / old_dim
@@ -133,7 +133,7 @@ def transform(img, label, box, truncate, occlusion, split):
     mean = [0.485, 0.456, 0.406]
     std = [0.229, 0.224, 0.225]
     new_img, new_label, new_box, new_truncate, new_occlusion = img, label, box, truncate, occlusion
-    '''if split == 'TRAIN':
+    if split == 'TRAIN':
         new_img = photometric_distortion(new_img)
         new_img = FT.to_tensor(new_img)
 
@@ -145,9 +145,9 @@ def transform(img, label, box, truncate, occlusion, split):
         new_img = FT.to_pil_image(new_img)
         if random.random() < 0.5:
             new_img, new_box = h_flip(new_img, new_box)
-'''
+
     new_img, new_box = resize(new_img, new_box)
     new_img = FT.to_tensor(new_img)
-    #Normalize
+    # Normalize
     new_img = FT.normalize(new_img, mean=mean, std=std)
     return new_img, new_label,  new_box, new_truncate, new_occlusion

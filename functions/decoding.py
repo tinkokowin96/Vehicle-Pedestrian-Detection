@@ -17,6 +17,8 @@ def decode(no_classes, min_score, max_overlap, top_k, predicted_location, predic
     for i in range(batch_size):
         decoded_loc = encxcy_to_cxcy(predicted_location[i], pri_box)
         decoded_loc = cxcy_to_xy(decoded_loc)
+        # print('\nPredicted Loc are ', decoded_loc[:30, :])
+        # continue
 
         class_box = list()
         class_label = list()

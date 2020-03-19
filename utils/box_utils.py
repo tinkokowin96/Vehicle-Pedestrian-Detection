@@ -5,12 +5,12 @@ device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
 
 def create_prior_boxes():
-    obj_scales = {'conv4_3': 0.1,
-                  'conv7': 0.2,
-                  'conv8_2': 0.375,
-                  'conv9_2': 0.55,
-                  'conv10_2': 0.725,
-                  'conv11_2': 0.9}
+    obj_scales = {'conv4_3': 0.1 * 300,
+                  'conv7': 0.2 * 300,
+                  'conv8_2': 0.375 * 300,
+                  'conv9_2': 0.55 * 300,
+                  'conv10_2': 0.725 * 300,
+                  'conv11_2': 0.9 * 300}
 
     aspect_ratios = {'conv4_3': [1., 2., 0.5],
                      'conv7': [1., 2., 3., 0.5, .333],
@@ -33,8 +33,8 @@ def create_prior_boxes():
     for i, fmap in enumerate(fmaps):
         for j in range(fmap_dims[fmap]):
             for k in range(fmap_dims[fmap]):
-                cx = (k + 0.5) / fmap_dims[fmap]
-                cy = (j + 0.5) / fmap_dims[fmap]
+                cx = (k + 0.5) * 300 / fmap_dims[fmap]
+                cy = (j + 0.5) * 300 / fmap_dims[fmap]
 
                 for r in aspect_ratios[fmap]:
                     w = obj_scales[fmap] * sqrt(r)
@@ -48,13 +48,13 @@ def create_prior_boxes():
                             additional_scale = sqrt(obj_scales[fmap] * obj_scales[fmaps[i + 1]])
                         # for the last layer there won't no next layer
                         except IndexError:
-                            additional_scale = 1.
+                            additional_scale = 300.
 
                         prior_boxes.append([cx, cy, additional_scale, additional_scale])
 
     # change to tensor form list
     prior_boxes = torch.FloatTensor(prior_boxes).to(device)
-    prior_boxes.clamp_(0, 1)
+    prior_boxes.clamp_(0, 300)
     return prior_boxes
 
 
@@ -98,9 +98,9 @@ def cxcy_to_xy(box):
                        torch.log(pre_box[:, 2:] / pri_box[:, 2:]) * 5], 1) #enwh '''
 
 
-def cxcy_to_encxcy(pre_box, priors_cxcy):
-    return torch.cat([(pre_box[:, :2] - priors_cxcy[:, :2]) / (priors_cxcy[:, 2:] / 10),  # en_c_x, en_c_y
-                      torch.log(pre_box[:, 2:] / priors_cxcy[:, 2:]) * 5], 1)  # en_w, en_h
+def cxcy_to_encxcy(gt_box, priors_cxcy):
+    return torch.cat([(gt_box[:, :2] - priors_cxcy[:, :2]) / (priors_cxcy[:, 2:] / 10),  # en_c_x, en_c_y
+                      torch.log(gt_box[:, 2:] / priors_cxcy[:, 2:]) * 5], 1)  # en_w, en_h
 
 
 def encxcy_to_cxcy(pre_box, pri_box):
