@@ -15,12 +15,12 @@ no_epoch = 200
 epo_since_imporv = 0
 batch_size = 16
 no_worker = 6
-weight_decay = 5e-4
-lr = 1e-3
+weight_decay = 1e-3
+lr = 1e-5
 momentum = 0.9
 c_grad = None
-# checkpoint = "D:/Projects/Research/Vehicle & Pedestrian Detection/Checkpoint/BEST_checkpoint.pth"
-checkpoint = None
+checkpoint = "D:/Projects/Research/Vehicle & Pedestrian Detection/Checkpoint/BEST_checkpoint.pth"
+# checkpoint = None
 best_loss = 100.
 print_freq = 100
 

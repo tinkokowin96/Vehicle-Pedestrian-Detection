@@ -7,7 +7,7 @@ from dataset import KITTI_Dataset
 import torch
 
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
-batch_size = 32
+batch_size = 4
 n_worker = 6
 data_folder = 'D:/Projects/Research/Vehicle & Pedestrian Detection/Demo/JSON'
 checkpoint = 'D:/Projects/Research/Vehicle & Pedestrian Detection/Checkpoint/BEST_checkpoint.pth'
@@ -39,9 +39,11 @@ def main():
             truncated = [t.to(device) for t in truncate]
             occlusions = [o.to(device) for o in occlusion]
 
+            print(boxes)
             pre_boxes, pre_scores = model(images)  # forward propagate
-            dec_boxes, dec_labels, dec_scores = decode(9, 0.01, 0.45, 200, pre_boxes, pre_scores)
 
+            dec_boxes, dec_labels, dec_scores = decode(9, 0.01, 0.45, 200, pre_boxes, pre_scores)
+'''
             true_boxes.extend(boxes)
             true_labels.extend(labels)
             true_truncated.extend(truncated)
@@ -54,7 +56,7 @@ def main():
                                           true_occlusion)
     pp.pprint(aps)
     print('\nMean Average Precision (mAP): %.3f' % map)
-
+'''
 
 if __name__ == '__main__':
     main()

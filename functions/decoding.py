@@ -1,13 +1,18 @@
+# TODO to integrate iou with ground true boxes, if not there will be more than boxes in an images that should be
+
 from utils.box_utils import create_prior_boxes, encxcy_to_cxcy, cxcy_to_xy, iou
 import torch.nn.functional as F
 import torch
 
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+count = 0
 
 
 def decode(no_classes, min_score, max_overlap, top_k, predicted_location, predicted_scores):
+    global count
     pri_box = create_prior_boxes()
     scores = F.softmax(predicted_scores, dim=2)
+
     batch_size = predicted_scores.size(0)
 
     all_boxes = list()
@@ -17,22 +22,24 @@ def decode(no_classes, min_score, max_overlap, top_k, predicted_location, predic
     for i in range(batch_size):
         decoded_loc = encxcy_to_cxcy(predicted_location[i], pri_box)
         decoded_loc = cxcy_to_xy(decoded_loc)
-        # print('\nPredicted Loc are ', decoded_loc[:30, :])
-        # continue
 
         class_box = list()
         class_label = list()
         class_scores = list()
 
         for c in range(1, no_classes):
+            count += 1
             class_score = scores[i][:, c]  # 8732
             score_abv_min = class_score > min_score  # 8732
             class_score = class_score[score_abv_min]  # no: qualified
             class_dec_loc = decoded_loc[score_abv_min]
+            print('\nNumber of loc in class', count, '\n', class_dec_loc.size())
             n_qualified = class_dec_loc.size(0)
 
             class_score, sort_id = class_score.sort(dim=0, descending=True)
             class_dec_loc = class_dec_loc[sort_id]
+            print(class_dec_loc)
+
             overlap = iou(class_dec_loc, class_dec_loc)  # no: qualified,no:qualified (to check how much a box is
             # overlap to other boxes)
 
@@ -56,7 +63,7 @@ def decode(no_classes, min_score, max_overlap, top_k, predicted_location, predic
             class_box.append(class_dec_loc[qual_obj])
             class_label.append(torch.LongTensor((1 - suppress).sum().item() * [c]).to(device))
             class_scores.append(class_score[qual_obj])
-
+        count = 0
         no_object = len(class_box)
         # if no object is found ,we'll set it as background
         if no_object == 0:
@@ -78,5 +85,6 @@ def decode(no_classes, min_score, max_overlap, top_k, predicted_location, predic
         all_boxes.append(class_box)
         all_labels.append(class_label)
         all_score.append(class_scores)
+        print('\nDecoded Boxes are\n', all_boxes)
 
     return all_boxes, all_labels, all_score

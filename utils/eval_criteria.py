@@ -7,6 +7,8 @@ label_map['dontcare'] = 0
 rev_label_map = {i: v for v, i in label_map.items()}
 n_classes = len(label_map)
 count = 0
+count1 = 0
+device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
 
 
 def mean_average_precision(det_boxes, det_labels, det_scores, true_boxes, true_labels, truncated, occlusion):
@@ -22,6 +24,7 @@ def mean_average_precision(det_boxes, det_labels, det_scores, true_boxes, true_l
     truncated = torch.cat(truncated, dim=0)
     occlusion = torch.cat(occlusion, dim=0)
     n_objects = true_boxes.size(0)
+    print(n_objects)
 
     det_objects = []
     for i in range(len(det_boxes)):
@@ -53,24 +56,26 @@ def mean_average_precision(det_boxes, det_labels, det_scores, true_boxes, true_l
             level['1'] = 'Easy'
             e_objects.append(true_objects[i])
             e_labels.append(true_labels[i])
+            continue
 
         if rank[i] == 2:
             level['2'] = 'Moderate'
             m_objects.append(true_objects[i])
             m_labels.append(true_labels[i])
+            continue
 
         else:
             level['3'] = 'Hard'
             h_objects.append(true_objects[i])
             h_labels.append(true_labels[i])
+            continue
 
-    e_objects = torch.tensor(e_objects)
-    e_labels = torch.tensor(e_labels)
-    m_objects = torch.tensor(m_objects)
-    m_labels = torch.tensor(m_labels)
-    h_objects = torch.tensor(h_objects)
-    h_labels = torch.tensor(h_labels)
-
+    e_objects = torch.tensor(e_objects).to(device)
+    e_labels = torch.tensor(e_labels).to(device)
+    m_objects = torch.tensor(m_objects).to(device)
+    m_labels = torch.tensor(m_labels).to(device)
+    h_objects = torch.tensor(h_objects).to(device)
+    h_labels = torch.tensor(h_labels).to(device)
     calculate_map(level['1'], det_objects, det_boxes, det_labels, det_scores, e_objects, e_labels, true_objects,
                   true_labels, true_boxes)
     '''calculate_map(level['2'], det_objects, det_boxes, det_labels, det_scores, m_objects, m_labels, true_objects,
@@ -81,7 +86,7 @@ def mean_average_precision(det_boxes, det_labels, det_scores, true_boxes, true_l
 
 def calculate_map(level, det_objects, det_boxes, det_labels, det_scores, r_objects, r_labels, true_objects, true_labels,
                   true_boxes):
-    global n_classes, count
+    global n_classes, count, count1
     true_positive = torch.zeros(det_boxes.size(0), dtype=torch.uint8)
     false_positive = torch.zeros(det_boxes.size(0), dtype=torch.uint8)
     average_precision = torch.zeros(n_classes - 1)
@@ -127,7 +132,8 @@ def calculate_map(level, det_objects, det_boxes, det_labels, det_scores, r_objec
 
             object_boxes = torch.cat(object_boxes, dim=0)
             object_boxes_ind = torch.tensor(object_boxes_ind)
-
+            count += 1
+            print(count)
             print(this_det_box, '\n', object_boxes)
             overlap = iou(this_det_box, object_boxes)  # (1,n_objects)
             overlap, ind = overlap.squeeze(0).max(dim=0)  # ind is obj level ind we need to find the class level ind
@@ -142,9 +148,6 @@ def calculate_map(level, det_objects, det_boxes, det_labels, det_scores, r_objec
                     false_positive[d] = 1
             else:
                 false_positive[d] = 1
-            count += 1
-            print(count)
-
         if true_positive.sum().item() == 0:
             continue
 
@@ -154,7 +157,8 @@ def calculate_map(level, det_objects, det_boxes, det_labels, det_scores, r_objec
         # float if we don't change to float it will only produce 0 coz it think of it as int
         cumul_recall = cumul_true_positive / fl_n_class_r_objects
 
-        count = 0
+        count1 += 1
+        print('Class {0} finished'.format(count1))
 
         recall_thresh = torch.arange(0., 1.1, .1, dtype=torch.float).tolist()
         precisions = torch.zeros(len(recall_thresh), dtype=torch.float)
@@ -168,7 +172,7 @@ def calculate_map(level, det_objects, det_boxes, det_labels, det_scores, r_objec
 
     map = average_precision.mean()
 
-    # print(map)
+    print(map)
     ap = {rev_label_map[i + 1]: v for i, v in enumerate(average_precision.tolist())}
     print(ap)
     return map

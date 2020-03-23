@@ -33,19 +33,21 @@ class MultiboxLoss(nn.Module):
             obj_for_priors[prior_for_obj] = torch.LongTensor(range(no_objects)).to(device)
             # we will set true only if has overlap more than threshold and so we need to assign the best match to
             # qualify for sure
-            overlap_to_obj[prior_for_obj] = 1
+            overlap_to_obj[prior_for_obj] = 1.
 
             label_for_priors = labels[i][obj_for_priors]
             label_for_priors[overlap_to_obj < self.threshold] = 0
 
             true_class[i] = label_for_priors
             true_loc[i] = cxcy_to_encxcy(xy_to_cxcy(boxes[i][obj_for_priors]), self.prior_cxcy)
+            # true_loc[i] = cxcy_to_xy(encxcy_to_cxcy(true_loc[i], self.prior_cxcy))
+            # pre_box[i] = cxcy_to_xy(encxcy_to_cxcy(pre_box[i], self.prior_cxcy))
 
         positive_priors = true_class != 0  # N,8732
 
         # location loss
         # print("\nPredicted Loc are\n", pre_box[positive_priors][:20, :], "\nTrue Loc are\n",
-        # true_loc[positive_priors][:20, :])
+        #      true_loc[positive_priors][:20, :])
         loc_loss = self.smoothl1loss(pre_box[positive_priors], true_loc[positive_priors])  # scalar
         # print(loc_loss)
 
