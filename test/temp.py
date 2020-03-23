@@ -209,13 +209,17 @@ p = encxcy_to_cxcy(p, cxcy)
 r = cxcy_to_xy(p)
 
 
-import torch.nn.functional as F
-import torch
+from PIL import ImageFont
 
-t = torch.tensor([0.1, 0.001, 0.21, 0.0056, 0.0032, 0.12, 0.032])
-r = F.softmax(t, 0)
+font = ImageFont.truetype(font='D:/Projects/Research/Resources/fonts/bp.ttf', size=10)
+r = font.getsize('Pedestrian')
 
 
-t1 = torch.tensor([[2.6179e-01, 4.5332e-01, 3.1088e-01, 7.2495e-01]])
-t = torch.tensor([[0.2577, 0.4332, 0.2981, 0.6818]])
-r = find_jaccard_overlap(t1, t)
+
+kitti_label = {'car', 'van', 'truck', 'pedestrian', 'person_sitting', 'cyclist', 'tram', 'misc'}
+label_map = {v: i + 1 for i, v in enumerate(kitti_label)}
+label_map['dontcare'] = 0
+rev_label_map = {i: v for v, i in label_map.items()}
+
+labels = [6]
+labels = [rev_label_map[lbl] for ind, lbl in enumerate(labels)]

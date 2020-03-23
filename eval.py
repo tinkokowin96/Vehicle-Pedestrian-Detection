@@ -39,7 +39,7 @@ def main():
             truncated = [t.to(device) for t in truncate]
             occlusions = [o.to(device) for o in occlusion]
 
-            print(boxes)
+            # print(boxes)
             pre_boxes, pre_scores = model(images)  # forward propagate
 
             dec_boxes, dec_labels, dec_scores = decode(9, 0.01, 0.45, 200, pre_boxes, pre_scores)

@@ -5,8 +5,9 @@ from PIL import Image
 import torch
 from utils.augmentation import transform
 
+
 class KITTI_Dataset (Dataset):
-    def __init__ (self, data_folder, split):
+    def __init__(self, data_folder, split):
         self.split = split.upper()       
         self.data_folder = data_folder
         

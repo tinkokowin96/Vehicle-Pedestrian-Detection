@@ -1,5 +1,3 @@
-# TODO to integrate iou with ground true boxes, if not there will be more than boxes in an images that should be
-
 from utils.box_utils import create_prior_boxes, encxcy_to_cxcy, cxcy_to_xy, iou
 import torch.nn.functional as F
 import torch
@@ -33,12 +31,12 @@ def decode(no_classes, min_score, max_overlap, top_k, predicted_location, predic
             score_abv_min = class_score > min_score  # 8732
             class_score = class_score[score_abv_min]  # no: qualified
             class_dec_loc = decoded_loc[score_abv_min]
-            print('\nNumber of loc in class', count, '\n', class_dec_loc.size())
+            # print('\nNumber of loc in class', count, '\n', class_dec_loc.size())
             n_qualified = class_dec_loc.size(0)
 
             class_score, sort_id = class_score.sort(dim=0, descending=True)
             class_dec_loc = class_dec_loc[sort_id]
-            print(class_dec_loc)
+            # print(class_dec_loc)
 
             overlap = iou(class_dec_loc, class_dec_loc)  # no: qualified,no:qualified (to check how much a box is
             # overlap to other boxes)
@@ -85,6 +83,7 @@ def decode(no_classes, min_score, max_overlap, top_k, predicted_location, predic
         all_boxes.append(class_box)
         all_labels.append(class_label)
         all_score.append(class_scores)
-        print('\nDecoded Boxes are\n', all_boxes)
+        # print('\nDet Boxes are\n', all_boxes)
+        # print('\nLabels are\n', all_labels)
 
     return all_boxes, all_labels, all_score
